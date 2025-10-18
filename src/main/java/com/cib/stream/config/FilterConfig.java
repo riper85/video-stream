@@ -8,18 +8,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-//@Configuration
+@Configuration
 public class FilterConfig {
-    @Bean
-    public FilterRegistrationBean<Filter> cspControlFilter() {
-        CspControlFilter cspControlFilter = new CspControlFilter("cdn.ing.com");
-
-        return createFilterRegistration(cspControlFilter, "/*");
-    }
 
     @Bean
     public FilterRegistrationBean<Filter> cspControlFilter2() {
-        CspControlFilter cspControlFilter = new CspControlFilter("'self'");
+        CspControlFilter cspControlFilter = new CspControlFilter();
 
         return createFilterRegistration(cspControlFilter, "/movie");
     }

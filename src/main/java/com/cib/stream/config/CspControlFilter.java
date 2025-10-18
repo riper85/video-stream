@@ -12,12 +12,6 @@ import java.io.IOException;
 
 public class CspControlFilter extends RequestContextFilter {
 
-    private String cspControl;
-
-    CspControlFilter(String cspControl) {
-        this.cspControl = cspControl;
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -25,25 +19,26 @@ public class CspControlFilter extends RequestContextFilter {
         System.out.println("CSP Filter...");
 
         ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(request);
-        ContentCachingResponseWrapper responseWrapper = new ContentCachingResponseWrapper(response);
+        ResponseConf responseWrapper = new ResponseConf(response);
 
         filterChain.doFilter(requestWrapper, responseWrapper);
-        System.out.println(request.getRequestURI());
-        System.out.println(request.getRequestURL());
         setCacheHeaders(responseWrapper, requestWrapper);
 
         responseWrapper.copyBodyToResponse();
     }
 
     private void setCacheHeaders(ContentCachingResponseWrapper responseWrapper, ContentCachingRequestWrapper requestWrapper) {
-        responseWrapper.setHeader("Content-Security-Policy", "default-src 'self'");
-        responseWrapper.setHeader("Content-Security-Policy", "media-src cdn.ing.com");
+        responseWrapper.setHeader("Content-Security-Policy", "media-src cdn.ing.com; default-src 'self'");
 
         if (requestWrapper.getRequestURI().equals("/")) {
-            StringBuilder csp = new StringBuilder("media-src 'self';");
+            StringBuilder csp = new StringBuilder();
 
             for (String header : responseWrapper.getHeaders("Content-Security-Policy")) {
-                csp.append(header).append(";");
+                if (header.contains("media-src")) {
+                    csp.append(header.replace("media-src", "media-src 'self' "));
+                } else {
+                    csp.append(header).append(";");
+                }
             }
 
             responseWrapper.setHeader("Content-Security-Policy", csp.toString());

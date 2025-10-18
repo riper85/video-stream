@@ -16,6 +16,7 @@ class MovieControler {
 
     @GetMapping(value = "movie", produces = "video/mp4")
     InputStreamResource movie() throws FileNotFoundException {
+
         return movie.getStream();
     }
 }
